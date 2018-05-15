@@ -86,6 +86,7 @@ func tunnelListener(addr string, tlsConfig *tls.Config) {
 
 			switch m := rawMsg.(type) {
 			case *msg.Auth:
+				tunnelConn.Warn("Failed to read message: %v", m)
 				NewControl(tunnelConn, m)
 
 			case *msg.RegProxy:

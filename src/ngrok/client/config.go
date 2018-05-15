@@ -24,6 +24,8 @@ type Configuration struct {
 	Tunnels            map[string]*TunnelConfiguration `yaml:"tunnels,omitempty"`
 	LogTo              string                          `yaml:"-"`
 	Path               string                          `yaml:"-"`
+	Ktvid              string                          `yaml:"ktvid,omitempty"`
+	Dogname            string                          `yaml:"dogname,omitempty"`
 }
 
 type TunnelConfiguration struct {
@@ -67,6 +69,18 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 		config = &Configuration{AuthToken: content}
 	}
 
+    //check configuration for ktv info
+    if opts.ktvid != ""{
+        config.Ktvid = opts.ktvid
+    }
+    if opts.dogname != ""{
+        config.Dogname = opts.dogname
+    }
+    if config.Ktvid == "" || config.Dogname == "" {
+		err = fmt.Errorf("incorrect ktvinfo %s.%s", config.Ktvid, config.Dogname)
+		return
+    }
+
 	// set configuration defaults
 	if config.ServerAddr == "" {
 		config.ServerAddr = defaultServerAddr
@@ -80,6 +94,7 @@ func LoadConfiguration(opts *Options) (config *Configuration, err error) {
 		config.HttpProxy = os.Getenv("http_proxy")
 	}
 
+	config.TrustHostRootCerts = true
 	// validate and normalize configuration
 	if config.InspectAddr != "disabled" {
 		if config.InspectAddr, err = normalizeAddress(config.InspectAddr, "inspect_addr"); err != nil {

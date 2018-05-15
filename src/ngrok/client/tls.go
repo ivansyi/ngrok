@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"ngrok/client/assets"
 )
 
@@ -30,6 +31,14 @@ func LoadTLSConfig(rootCertPaths []string) (*tls.Config, error) {
 
 		pool.AddCert(certs[0])
 	}
+
+	//add self-signed CA:
+	caCrt, err := ioutil.ReadFile("/etc/ssl/cert.pem")
+	if err != nil {
+		fmt.Println("ReadFile err:", err)
+		return nil, err
+	}
+	pool.AppendCertsFromPEM(caCrt)
 
 	return &tls.Config{RootCAs: pool}, nil
 }

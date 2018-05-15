@@ -39,6 +39,8 @@ type Auth struct {
 	OS        string
 	Arch      string
 	ClientId  string // empty for new sessions
+	Ktvid     string //Added by yishunli@thunder.com.cn
+	Dogname   string
 }
 
 // A server responds to an Auth message with an

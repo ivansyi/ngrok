@@ -52,6 +52,8 @@ type ClientModel struct {
 	tlsConfig     *tls.Config
 	tunnelConfig  map[string]*TunnelConfiguration
 	configPath    string
+	ktvid         string
+	dogname       string
 }
 
 func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
@@ -99,6 +101,14 @@ func newClientModel(config *Configuration, ctl mvc.Controller) *ClientModel {
 
 		// config path
 		configPath: config.Path,
+
+		//TODO: get the ktvid dinamically
+		//config ktvid
+		ktvid: config.Ktvid,
+
+		//TODO: get the dogname from the dog service
+		//config dogname
+		dogname: config.Dogname,
 	}
 
 	// configure TLS
@@ -240,6 +250,8 @@ func (c *ClientModel) control() {
 		Version:   version.Proto,
 		MmVersion: version.MajorMinor(),
 		User:      c.authToken,
+		Ktvid:     c.ktvid,
+		Dogname:   c.dogname,
 	}
 
 	if err = msg.WriteMsg(ctlConn, auth); err != nil {

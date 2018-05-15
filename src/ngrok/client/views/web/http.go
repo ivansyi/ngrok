@@ -263,6 +263,55 @@ func (whv *WebHttpView) register() {
 			panic(err)
 		}
 	})
+
+	http.HandleFunc("/tunnels", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				err := util.MakePanicTrace(r)
+				whv.Error("HTTP web view failed: %v", err)
+				http.Error(w, err, 500)
+			}
+		}()
+		w.Header().Set("content-type", "application/json")
+
+		payloadData := SerializedUiState{
+			//Txns:    whv.HttpRequests.Slice(),
+			Tunnels: whv.ctl.State().GetTunnels(),
+		}
+
+		payload, err := json.Marshal(payloadData)
+		if err != nil {
+			panic(err)
+		}
+		// write the response
+		w.Write([]byte(payload))
+		//fmt.Fprint(w, string(payload))
+	})
+
+	http.HandleFunc("/conns", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				err := util.MakePanicTrace(r)
+				whv.Error("HTTP web view failed: %v", err)
+				http.Error(w, err, 500)
+			}
+		}()
+		w.Header().Set("content-type", "application/json")
+
+		payloadData := SerializedPayload{
+			Txns:    whv.HttpRequests.Slice(),
+			UiState: SerializedUiState{Tunnels: whv.ctl.State().GetTunnels()},
+		}
+
+		payload, err := json.Marshal(payloadData)
+		if err != nil {
+			panic(err)
+		}
+		// write the response
+		w.Write([]byte(payload))
+		//fmt.Fprint(w, string(payload))
+	})
+
 }
 
 func (whv *WebHttpView) Shutdown() {

@@ -69,7 +69,7 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 		conn:            ctlConn,
 		out:             make(chan msg.Message),
 		in:              make(chan msg.Message),
-		proxies:         make(chan conn.Conn, 10),
+		proxies:         make(chan conn.Conn, proxyMaxPoolSize),
 		lastPing:        time.Now(),
 		writerShutdown:  util.NewShutdown(),
 		readerShutdown:  util.NewShutdown(),
@@ -80,6 +80,17 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	failAuth := func(e error) {
 		_ = msg.WriteMsg(ctlConn, &msg.AuthResp{Error: e.Error()})
 		ctlConn.Close()
+	}
+
+	if authMsg.Ktvid == "" {
+		err = fmt.Errorf("Incorrect Ktv ID(%s)", authMsg.Ktvid)
+		failAuth(err)
+		return
+	}
+	if authMsg.Dogname == "" {
+		err = fmt.Errorf("Incorrect Dog Name(%s)", authMsg.Dogname)
+		failAuth(err)
+		return
 	}
 
 	// register the clientid
@@ -131,7 +142,7 @@ func (c *Control) registerTunnel(rawTunnelReq *msg.ReqTunnel) {
 		tunnelReq := *rawTunnelReq
 		tunnelReq.Protocol = proto
 
-		c.conn.Debug("Registering new tunnel")
+		c.conn.Debug("Registering new tunnel: %v", tunnelReq)
 		t, err := NewTunnel(&tunnelReq, c)
 		if err != nil {
 			c.out <- &msg.NewTunnel{Error: err.Error()}

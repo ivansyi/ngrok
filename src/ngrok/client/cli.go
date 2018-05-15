@@ -44,7 +44,10 @@ type Options struct {
 	hostname  string
 	protocol  string
 	subdomain string
+	signature string
 	command   string
+    ktvid     string
+    dogname   string
 	args      []string
 }
 
@@ -95,6 +98,21 @@ func ParseArgs() (opts *Options, err error) {
 		"http+https",
 		"The protocol of the traffic over the tunnel {'http', 'https', 'tcp'} (default: 'http+https')")
 
+	signature := flag.String(
+		"sign",
+		"",
+		"The signature is use to check the client not illegal")
+
+	ktvid := flag.String(
+		"ktvid",
+		"",
+		"The ktvid info")
+
+	dogname := flag.String(
+		"dogname",
+		"",
+		"The dogname string")
+
 	flag.Parse()
 
 	opts = &Options{
@@ -106,6 +124,9 @@ func ParseArgs() (opts *Options, err error) {
 		protocol:  *protocol,
 		authtoken: *authtoken,
 		hostname:  *hostname,
+		signature: *signature,
+		ktvid:      *ktvid,
+		dogname:    *dogname,
 		command:   flag.Arg(0),
 	}
 
